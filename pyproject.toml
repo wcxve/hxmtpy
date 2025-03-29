@@ -1,0 +1,98 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hxmtpy"
+dynamic = ["version"]
+description = 'Insight-HXMT data analysis Python tools.'
+readme = "README.md"
+requires-python = ">=3.10, <3.13"
+license = "GPL-3.0-or-later"
+keywords = []
+authors = [
+    { name = "xuewc", email = "wcxuemail@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+dependencies = [
+    "astropy",
+    "matplotlib",
+    "numpy",
+    "rich",
+    "scipy",
+]
+
+[project.optional-dependencies]
+test = ["coverage[toml]", "pytest", "pytest-cov"]
+docs = [
+    "ipywidgets",
+    "jupyter",
+    "jupyterlab_widgets",
+    "sphinx>=7.4.0",
+    "sphinx-autodoc-typehints",
+    "sphinx-codeautolink",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "myst-nb",
+    "numpydoc",
+    "pydata-sphinx-theme",
+    "widgetsnbextension",
+]
+dev = ["pre-commit>=3.6.0", "ruff>=0.2.0"]
+
+[project.urls]
+Documentation = "https://github.com/wcxve/hxmtpy#readme"
+Issues = "https://github.com/wcxve/hxmtpy/issues"
+Source = "https://github.com/wcxve/hxmtpy"
+
+[tool.hatch.version]
+build.targets.wheel.packages = ["src/hxmtpy"]
+path = "src/hxmtpy/__about__.py"
+
+[tool.ruff]
+line-length = 79
+target-version = "py310"
+format.quote-style = "single"
+lint.extend-select = ["Q"]
+lint.flake8-quotes.inline-quotes = "single"
+lint.ignore = [
+    "B028",  # allow warnings without stacklevel
+    "C901",  # allow functions with a high complexity
+    "E731",  # allow lambda functions
+]
+lint.isort.known-first-party = ["src"]
+lint.isort.combine-as-imports = true
+lint.select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "UP",  # pyupgrade
+]
+
+[tool.pytest]
+ini_options.addopts = "--cov=hxmtpy --cov-report xml"
+
+[tool.coverage]
+run.branch = true
+run.parallel = true
+run.source = ["src/"]
+paths.source = ["src/", "*/site-packages"]
+report.exclude_lines = [
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+report.show_missing = true
