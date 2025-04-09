@@ -246,7 +246,7 @@ def reduce_le_data(
         'LE_PEDESTAL': f'{prefix}_PEDESTAL.fits',
         'LE_RECON': f'{prefix}_RECON.fits',
         'LE_GTI': f'{prefix}_GTI.fits',
-        'LE_GTI_TMP': f'{prefix}_GTI.tmp',
+        'LE_GTI_CORR': f'{prefix}_GTI_CORR.fits',
         'LE_SCREEN': f'{prefix}_SCREEN.fits',
     }
 
@@ -271,47 +271,31 @@ def reduce_le_data(
         'clobber={clobber_recon}',
         mapping,
     )
+    cmd_gti = str.format_map(
+        'legtigen '
+        'evtfile=NONE '
+        'instatusfile="{LE_InsStat}" '
+        'tempfile="{LE_TH}" '
+        'ehkfile="{EHK}" '
+        'outfile="{LE_GTI}" '
+        'defaultexpr=NONE '
+        f'expr="{gti_expr}" '
+        'clobber={clobber_recon}',
+        mapping,
+    )
+    cmd_gti_corr = str.format_map(
+        'legticorr "{LE_RECON}" "{LE_GTI}" "{LE_GTI_CORR}"',
+        mapping,
+    )
+
     if GTI_TYPE == 'standard':
-        cmd_gti = {
-            'legtigen': str.format_map(
-                'legtigen '
-                'evtfile=NONE '
-                'instatusfile="{LE_InsStat}" '
-                'tempfile="{LE_TH}" '
-                'ehkfile="{EHK}" '
-                'outfile="{LE_GTI_TMP}" '
-                'defaultexpr=NONE '
-                f'expr="{gti_expr}" '
-                'clobber={clobber_recon}',
-                mapping,
-            ),
-            'legticorr': str.format_map(
-                'legticorr "{LE_RECON}" "{LE_GTI_TMP}" "{LE_GTI}"',
-                mapping,
-            ),
-        }
-    elif GTI_TYPE == 'burst':
-        files.pop('LE_GTI_TMP')
-        cmd_gti = {
-            'legtigen': str.format_map(
-                'legtigen '
-                'evtfile=NONE '
-                'instatusfile="{LE_InsStat}" '
-                'tempfile="{LE_TH}" '
-                'ehkfile="{EHK}" '
-                'outfile="{LE_GTI}" '
-                'defaultexpr=NONE '
-                f'expr="{gti_expr}" '
-                'clobber={clobber_recon}',
-                mapping,
-            )
-        }
+        gti_file = files['LE_GTI_CORR']
     else:
-        raise ValueError(f'Unknown GTI_TYPE: {GTI_TYPE}')
+        gti_file = files['LE_GTI']
     cmd_screen = str.format_map(
         'lescreen '
         'evtfile="{LE_RECON}" '
-        'gtifile="{LE_GTI}" '
+        f'gtifile="{gti_file}" '
         'outfile="{LE_SCREEN}" '
         f'userdetid="{det_expr}" '
         'eventtype=1 '
@@ -326,7 +310,8 @@ def reduce_le_data(
     status = {
         'lepical': run_cmd(cmd_pical),
         'lerecon': run_cmd(cmd_recon),
-        **{k: run_cmd(v) for k, v in cmd_gti.items()},
+        'legtigen': run_cmd(cmd_gti),
+        'legticorr': run_cmd(cmd_gti_corr),
         'lescreen': run_cmd(cmd_screen),
     }
 
@@ -362,7 +347,7 @@ def reduce_me_data(
         'ME_GRADE': f'{prefix}_GRADE.fits',
         'ME_DTIME': f'{prefix}_DTIME.fits',
         'ME_GTI': f'{prefix}_GTI.fits',
-        'ME_GTI_TMP': f'{prefix}_GTI.tmp',
+        'ME_GTI_CORR': f'{prefix}_GTI_CORR.fits',
         'ME_DETSTAT': f'{prefix}_DETSTAT.fits',
         'ME_SCREEN': f'{prefix}_SCREEN.fits',
     }
@@ -394,7 +379,7 @@ def reduce_me_data(
         'megtigen '
         'tempfile="{ME_TH}" '
         'ehkfile="{EHK}" '
-        'outfile="{ME_GTI_TMP}" '
+        'outfile="{ME_GTI}" '
         'defaultexpr=NONE '
         f'expr="{gti_expr}" '
         'clobber={clobber}',
@@ -402,15 +387,19 @@ def reduce_me_data(
     )
 
     cmd_gticorr = str.format_map(
-        'megticorr "{ME_GRADE}" "{ME_GTI_TMP}" "{ME_GTI}" '
+        'megticorr "{ME_GRADE}" "{ME_GTI}" "{ME_GTI_CORR}" '
         '$HEADAS/refdata/medetectorstatus.fits "{ME_DETSTAT}"',
         mapping,
     )
 
+    if GTI_TYPE == 'standard':
+        gti_file = files['ME_GTI_CORR']
+    else:
+        gti_file = files['ME_GTI']
     cmd_screen = str.format_map(
         'mescreen '
         'evtfile="{ME_GRADE}" '
-        'gtifile="{ME_GTI}" '
+        f'gtifile="{gti_file}" '
         'outfile="{ME_SCREEN}" '
         'baddetfile="{ME_DETSTAT}" '
         f'userdetid="{det_expr}" '
