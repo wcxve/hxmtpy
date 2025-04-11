@@ -13,6 +13,8 @@ from astropy.io import fits
 from rich.table import Table
 
 from . import CustomProgress, get_pi_range
+from ..__about__ import __version__
+
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -1410,7 +1412,7 @@ def generate_counts_phaii(
         respfile = np.array(['' for _ in range(tstart.size)], dtype=str)
 
     primary = fits.PrimaryHDU()
-    creator = 'XRB221021 util v0.1'
+    creator = f'HXMTPy v{__version__}'
     primary.header['CREATOR'] = (creator, 'Software and version creating file')
     primary.header['FILETYPE'] = ('PHAII', 'Name for this type of FITS file')
     primary.header['FILE-VER'] = (
