@@ -96,6 +96,10 @@ def get_default_he_pm_expr() -> str:
         raise ValueError(f'Unknown GTI_TYPE: {GTI_TYPE}')
 
 
+def get_hxmt_data_path():
+    return os.environ.get('HXMT_DATA_PATH', '/hxmtfs2/work/HXMT-DATA')
+
+
 def get_he_ascend_file() -> str:
     if GTI_TYPE == 'standard':
         return '$HEADAS/refdata/HE_D0_C26-255_Ascend_PHA_Map.txt'
@@ -118,8 +122,9 @@ def get_obsid(proposal_id: str) -> list[str]:
     proposal_id = str(proposal_id)
     assert len(proposal_id) == 8
     year = proposal_id[1:3]
+    hxmt_data_path = get_hxmt_data_path()
     dirs = glob.glob(
-        f'/hxmtfs2/work/HXMT-DATA/1L/A{year}/{proposal_id}/{proposal_id}???/'
+        f'{hxmt_data_path}/1L/A{year}/{proposal_id}/{proposal_id}???/'
         f'{proposal_id}?????-????????-??-??'
     )
     obsid = sorted({d.split('/')[-1].split('-')[0] for d in dirs})
@@ -129,7 +134,8 @@ def get_obsid(proposal_id: str) -> list[str]:
 def get_files(obsid: str, det: Literal['LE', 'ME', 'HE']) -> dict[str, str]:
     obsid = str(obsid)
     det = str(det).upper()
-    p1 = f'/hxmtfs2/work/HXMT-DATA/1L/A{obsid[1:3]}/{obsid[:-5]}/{obsid[:-2]}'
+    hxmt_data_path = get_hxmt_data_path()
+    p1 = f'{hxmt_data_path}/1L/A{obsid[1:3]}/{obsid[:-5]}/{obsid[:-2]}'
     p2 = f'{p1}/{obsid}-????????-??-??'
     files = {
         'Att': get_file_by_pattern(
