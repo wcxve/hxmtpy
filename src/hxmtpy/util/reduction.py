@@ -12,9 +12,8 @@ import numpy as np
 from astropy.io import fits
 from rich.table import Table
 
-from . import CustomProgress, get_pi_range
 from ..__about__ import __version__
-
+from . import CustomProgress, get_pi_range
 
 if TYPE_CHECKING:
     from typing import Literal

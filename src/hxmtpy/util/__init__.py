@@ -9,7 +9,6 @@ from astropy.time import Time
 from rich.console import Group
 from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
-
 if TYPE_CHECKING:
     from typing import Literal
 
